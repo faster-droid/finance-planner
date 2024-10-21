@@ -9,4 +9,4 @@ docker run -d -p 8080:8080 \
   -v finance-planner-db-data:/data \
   finance-planner:latest
 
-  x_x
+  x_
