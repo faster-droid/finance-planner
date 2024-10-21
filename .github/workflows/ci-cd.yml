@@ -78,4 +78,3 @@ jobs:
             docker stop finance-planner
             docker rm finance-planner
             fi
-            docker run -d --name finance-planner -p 80:8080 ghcr.io/$REPO_NAME/finance-planner:${{ github.run_number }}
