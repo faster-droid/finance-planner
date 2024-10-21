@@ -55,6 +55,7 @@ public class ExpenseServlet extends HttpServlet {
     }
 
     @Override
+
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         request.setCharacterEncoding("UTF-8");
@@ -99,6 +100,7 @@ public class ExpenseServlet extends HttpServlet {
 
     private void addExpense(HttpServletRequest request, HttpServletResponse response)
             throws SQLException, IOException {
+
         String item = request.getParameter("item");
         String amountStr = request.getParameter("amount");
         BigDecimal amount = new BigDecimal(amountStr);
