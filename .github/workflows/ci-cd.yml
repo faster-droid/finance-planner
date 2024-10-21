@@ -31,6 +31,10 @@ jobs:
       - name: Build with Maven
         run: mvn clean package
 
+      # 
+      - name: Set Docker repository name
+        run: echo "REPO_NAME=${GITHUB_REPOSITORY_OWNER,,}" >> $GITHUB_ENV
+
       # Шаг 4: Логин в GitHub Container Registry
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v2
