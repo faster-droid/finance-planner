@@ -8,3 +8,5 @@ docker run -d -p 8080:8080 \
   --name finance-planner-app \
   -v finance-planner-db-data:/data \
   finance-planner:latest
+
+  x_x
