@@ -10,3 +10,4 @@ docker run -d -p 8080:8080 \
   finance-planner:latest
 
   0_01
+
