@@ -5,7 +5,7 @@ on:
     branches:
       - develop
       - main
-      - feature/act
+      - feature/volume
 
 permissions:
   contents: read
@@ -64,4 +64,4 @@ jobs:
             docker pull ghcr.io/${{ github.repository_owner }}/finance-planner:${{ github.run_number }}
             docker stop finance-planner || true
             docker rm finance-planner || true
-            docker run -d --name finance-planner -p 80:8080 ghcr.io/${{ github.repository_owner }}/finance-planner:${{ github.run_number }}
+            docker run -d --name finance-planner -p 80:8080 -v finance-planner-db-data:/data ghcr.io/${{ github.repository_owner }}/finance-planner:${{ github.run_number }}
