@@ -98,7 +98,7 @@ jobs:
 
           # Создаем тег в git
           git tag $NEW_TAG
-          git push origin --tags || echo "Failed to push tag $NEW_TAG. It may already exist."
+          git push origin $NEW_TAG || echo "Failed to push tag $NEW_TAG. It may already exist."
 
   deploy:
     needs: build_and_publish
