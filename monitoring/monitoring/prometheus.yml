@@ -4,4 +4,4 @@ global:
 scrape_configs:
   - job_name: 'prometheus'
     static_configs:
-      - targets: ['localhost:9090']  # Укажите целевые адреса
+      - targets: ['viazar.ru:80']  # Укажите целевые адреса
