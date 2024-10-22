@@ -3,9 +3,11 @@ name: CI/CD Pipeline
 on:
   push:
     branches:
-      - develop
       - master
-      - feature/volume
+      - develop
+      - feature/*
+      - release/*
+      - hotfix/*
 
   pull_request:
     branches:
@@ -65,8 +67,12 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
+            # Логин в GitHub Container Registry
             docker login ghcr.io -u ${{ github.actor }} -p ${{ secrets.GITHUB_TOKEN }}
+            # Пулл последнего образа
             docker pull ghcr.io/${{ github.repository_owner }}/finance-planner:${{ github.run_number }}
+            # Остановка и удаление старого контейнера, если он существует
             docker stop finance-planner || true
             docker rm finance-planner || true
+            # Запуск нового контейнера
             docker run -d --name finance-planner -p 80:8080 -v finance-planner-db-data:/data ghcr.io/${{ github.repository_owner }}/finance-planner:${{ github.run_number }}
