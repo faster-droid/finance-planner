@@ -63,14 +63,23 @@ jobs:
         id: version
         run: |
           # Получаем последний тег
-          LAST_TAG=$(git describe --tags --abbrev=0 || echo "v1.0.0")
+          LAST_TAG=$(git describe --tags --abbrev=0 || echo "v0.0.0")
           echo "Last tag: $LAST_TAG"
 
           # Разбиваем тег на части
           IFS='.' read -r MAJOR MINOR PATCH <<< "${LAST_TAG#v}"
 
-          # Увеличиваем версию в зависимости от типа изменений
-          PATCH=$((PATCH + 1))  # Увеличиваем патч-версию по умолчанию
+          # Определяем тип ветки и увеличиваем соответствующую версию
+          if [[ "${GITHUB_REF}" == refs/heads/hotfix/* ]]; then
+            PATCH=$((PATCH + 1))  # Увеличиваем патч-версию
+          elif [[ "${GITHUB_REF}" == refs/heads/feature/* ]]; then
+            MINOR=$((MINOR + 1))  # Увеличиваем минорную версию
+            PATCH=0  # Сбрасываем патч-версию
+          elif [[ "${GITHUB_REF}" == refs/heads/develop ]]; then
+            MAJOR=$((MAJOR + 1))  # Увеличиваем мажорную версию
+            MINOR=0  # Сбрасываем минорную версию
+            PATCH=0  # Сбрасываем патч-версию
+          fi
 
           # Создаем новый тег
           NEW_TAG="v$MAJOR.$MINOR.$PATCH"
