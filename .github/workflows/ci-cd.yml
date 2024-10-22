@@ -63,16 +63,14 @@ jobs:
         id: version
         run: |
           # Получаем последний тег
-          LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
+          LAST_TAG=$(git describe --tags --abbrev=0 || echo "v0.0.0")
           echo "Last tag: $LAST_TAG"
 
           # Разбиваем тег на части
           IFS='.' read -r MAJOR MINOR PATCH <<< "${LAST_TAG#v}"
 
           # Увеличиваем версию в зависимости от типа изменений
-          MAJOR=$((MAJOR + 1))
-          MINOR=0
-          PATCH=0
+          PATCH=$((PATCH + 1))  # Увеличиваем патч-версию по умолчанию
 
           # Создаем новый тег
           NEW_TAG="v$MAJOR.$MINOR.$PATCH"
@@ -80,8 +78,7 @@ jobs:
 
           # Проверяем, существует ли тег
           while git rev-parse "$NEW_TAG" >/dev/null 2>&1; do
-            echo "Tag $NEW_TAG already exists. Incrementing the version."
-            # Увеличиваем патч-версию, если тег уже существует
+            echo "Tag $NEW_TAG already exists. Incrementing the patch version."
             PATCH=$((PATCH + 1))
             NEW_TAG="v$MAJOR.$MINOR.$PATCH"
             echo "New tag after increment: $NEW_TAG"
