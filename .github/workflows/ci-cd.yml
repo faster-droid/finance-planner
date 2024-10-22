@@ -63,7 +63,7 @@ jobs:
         id: version
         run: |
           # Получаем последний тег
-          LAST_TAG=$(git describe --tags --abbrev=0 || echo "v0.0.0")
+          LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
           echo "Last tag: $LAST_TAG"
 
           # Разбиваем тег на части
@@ -79,13 +79,13 @@ jobs:
           echo "New tag: $NEW_TAG"
 
           # Проверяем, существует ли тег
-          if git rev-parse "$NEW_TAG" >/dev/null 2>&1; then
-            echo "Tag $NEW_TAG already exists. Incrementing the patch version."
+          while git rev-parse "$NEW_TAG" >/dev/null 2>&1; do
+            echo "Tag $NEW_TAG already exists. Incrementing the version."
             # Увеличиваем патч-версию, если тег уже существует
             PATCH=$((PATCH + 1))
             NEW_TAG="v$MAJOR.$MINOR.$PATCH"
             echo "New tag after increment: $NEW_TAG"
-          fi
+          done
 
           # Устанавливаем выходное значение
           echo "new_tag=$NEW_TAG" >> $GITHUB_ENV
