@@ -7,6 +7,11 @@ on:
       - main
       - feature/volume
 
+  pull_request:
+    branches:
+      - master
+    types: [merged]
+
 permissions:
   contents: read
   packages: write  # Для публикации в GHCR нужны дополнительные права
