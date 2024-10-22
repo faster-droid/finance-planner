@@ -63,7 +63,7 @@ jobs:
         id: version
         run: |
           # Получаем последний тег
-          LAST_TAG=$(git describe --tags --abbrev=0 || echo "v0.0.0")
+          LAST_TAG=$(git describe --tags --abbrev=0 || echo "v1.0.0")
           echo "Last tag: $LAST_TAG"
 
           # Разбиваем тег на части
