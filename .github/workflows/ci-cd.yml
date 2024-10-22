@@ -4,13 +4,13 @@ on:
   push:
     branches:
       - develop
-      - main
+      - master
       - feature/volume
 
   pull_request:
     branches:
       - master
-    types: [merged]
+    types: [closed]
 
 permissions:
   contents: read
