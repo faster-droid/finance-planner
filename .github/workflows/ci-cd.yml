@@ -15,7 +15,7 @@ on:
     types: [closed]
 
 permissions:
-  contents: write
+  contents: read
   packages: write  # Для публикации в GHCR нужны дополнительные права
 
 jobs:
@@ -53,6 +53,7 @@ jobs:
       # Шаг 6: Публикация Docker-образа в GHCR
       - name: Push Docker image to GHCR
         run: docker push ghcr.io/${{ github.repository_owner }}/finance-planner:${{ github.run_number }}
+
 
       # Шаг 7: Обновление документации (например, с помощью Javadoc)
       - name: Generate Javadoc
@@ -105,7 +106,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Шаг 9: Деплой приложения на сервер через SSH
+      # Шаг 7: Деплой приложения на сервер через SSH
       - name: Deploy to Server via SSH
         uses: appleboy/ssh-action@master
         with:
