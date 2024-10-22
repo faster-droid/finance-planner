@@ -1,6 +1,6 @@
 services:
   finance-planner:
-    image: ghcr.io/${REPOSITORY_OWNER}/finance-planner:62
+    image: ghcr.io/${REPOSITORY_OWNER}/finance-planner:64
     ports:
       - "8080:8080"
     volumes:
@@ -23,6 +23,8 @@ services:
     image: grafana/grafana
     ports:
       - "3000:3000"
+    volumes:
+      - grafana-storage:/var/lib/grafana
     networks:
       - monitoring-network
 
@@ -50,3 +52,4 @@ networks:
 
 volumes:
   finance-planner-db-data:
+  grafana-storage:
