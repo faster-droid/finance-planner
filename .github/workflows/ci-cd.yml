@@ -80,7 +80,7 @@ jobs:
 
           # Проверяем, существует ли тег
           if git rev-parse "$NEW_TAG" >/dev/null 2>&1; then
-            echo "Tag $NEW_TAG already exists. Incrementing the version."
+            echo "Tag $NEW_TAG already exists. Incrementing the patch version."
             # Увеличиваем патч-версию, если тег уже существует
             PATCH=$((PATCH + 1))
             NEW_TAG="v$MAJOR.$MINOR.$PATCH"
