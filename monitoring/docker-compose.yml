@@ -1,0 +1,52 @@
+services:
+  finance-planner:
+    image: ghcr.io/${REPOSITORY_OWNER}/finance-planner:62
+    ports:
+      - "8080:8080"
+    volumes:
+      - finance-planner-db-data:/data
+    environment:
+      - LOGGING_LEVEL=INFO  # Убедитесь, что ваше приложение настроено на вывод логов
+    networks:
+      - monitoring-network
+
+  prometheus:
+    image: prom/prometheus
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+    networks:
+      - monitoring-network
+
+  grafana:
+    image: grafana/grafana
+    ports:
+      - "3000:3000"
+    networks:
+      - monitoring-network
+
+  elasticsearch:
+    image: elasticsearch:7.10.1
+    environment:
+      - discovery.type=single-node
+    ports:
+      - "9200:9200"
+    networks:
+      - monitoring-network
+
+  logstash:
+    image: logstash:7.10.1
+    ports:
+      - "5044:5044"
+    networks:
+      - monitoring-network
+    volumes:
+      - ./logstash.conf:/usr/share/logstash/pipeline/logstash.conf
+
+networks:
+  monitoring-network:
+    driver: bridge
+
+volumes:
+  finance-planner-db-data:
