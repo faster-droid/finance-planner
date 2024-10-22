@@ -11,3 +11,5 @@ docker run -d -p 8080:8080 \
 
 http://82.146.40.100/finance-planner/expenses
 
+
+-------
