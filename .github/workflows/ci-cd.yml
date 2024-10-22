@@ -15,7 +15,7 @@ on:
     types: [closed]
 
 permissions:
-  contents: read
+  contents: write
   packages: write  # Для публикации в GHCR нужны дополнительные права
 
 jobs:
