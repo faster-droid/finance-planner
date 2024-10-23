@@ -44,7 +44,7 @@ services:
       - monitoring-network
 
   elasticsearch: 
-    image: elasticsearch:7.10.1 
+    image: elasticsearch:7.17.25
     environment: 
       - discovery.type=single-node 
     ports: 
