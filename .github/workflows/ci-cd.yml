@@ -3,9 +3,11 @@ name: CI/CD Pipeline
 on:
   push:
     branches:
-      - develop
       - master
-      - feature/volume
+      - develop
+      - feature/*
+      - release/*
+      - hotfix/*
 
   pull_request:
     branches:
@@ -52,6 +54,53 @@ jobs:
       - name: Push Docker image to GHCR
         run: docker push ghcr.io/${{ github.repository_owner }}/finance-planner:${{ github.run_number }}
 
+
+      # Шаг 7: Обновление документации (например, с помощью Javadoc)
+      - name: Generate Javadoc
+        run: mvn javadoc:javadoc
+
+      # Шаг 8: Определение и увеличение версии
+      - name: Determine and Bump Version
+        id: version
+        run: |
+          # Получаем последний тег или устанавливаем начальное значение
+          LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
+          echo "Last tag: $LAST_TAG"
+
+          # Разбиваем тег на части
+          IFS='.' read -r MAJOR MINOR PATCH <<< "${LAST_TAG#v}"
+
+          # Определяем тип ветки и увеличиваем соответствующую версию
+          if [[ "${GITHUB_REF}" == refs/heads/hotfix/* ]]; then
+            PATCH=$((PATCH + 1))  # Увеличиваем патч-версию
+          elif [[ "${GITHUB_REF}" == refs/heads/feature/* ]]; then
+            MINOR=$((MINOR + 1))  # Увеличиваем минорную версию
+            PATCH=0  # Сбрасываем патч-версию
+          elif [[ "${GITHUB_REF}" == refs/heads/develop ]]; then
+            MAJOR=$((MAJOR + 1))  # Увеличиваем мажорную версию
+            MINOR=0  # Сбрасываем минорную версию
+            PATCH=0  # Сбрасываем патч-версию
+          fi
+
+          # Создаем новый тег
+          NEW_TAG="v$MAJOR.$MINOR.$PATCH"
+          echo "New tag: $NEW_TAG"
+
+          # Проверяем, существует ли тег
+          while git rev-parse "$NEW_TAG" >/dev/null 2>&1; do
+            echo "Tag $NEW_TAG already exists. Incrementing the patch version."
+            PATCH=$((PATCH + 1))
+            NEW_TAG="v$MAJOR.$MINOR.$PATCH"
+            echo "New tag after increment: $NEW_TAG"
+          done
+
+          # Устанавливаем выходное значение
+          echo "new_tag=$NEW_TAG" >> $GITHUB_ENV
+
+          # Создаем тег в git
+          git tag $NEW_TAG
+          git push origin $NEW_TAG || echo "Failed to push tag $NEW_TAG. It may already exist."
+
   deploy:
     needs: build_and_publish
     runs-on: ubuntu-latest
@@ -65,8 +114,12 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
+            # Логин в GitHub Container Registry
             docker login ghcr.io -u ${{ github.actor }} -p ${{ secrets.GITHUB_TOKEN }}
+            # Пулл последнего образа
             docker pull ghcr.io/${{ github.repository_owner }}/finance-planner:${{ github.run_number }}
+            # Остановка и удаление старого контейнера, если он существует
             docker stop finance-planner || true
             docker rm finance-planner || true
+            # Запуск нового контейнера
             docker run -d --name finance-planner -p 80:8080 -v finance-planner-db-data:/data ghcr.io/${{ github.repository_owner }}/finance-planner:${{ github.run_number }}
