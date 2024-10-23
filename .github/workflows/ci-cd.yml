@@ -128,4 +128,4 @@ jobs:
           echo "IMAGE_TAG=${{ github.run_number }}" >> .env
 
           # Запустить или перезапустить сервис finance-planner через docker-compose
-          docker compose up -d finance-planner
+          docker compose up -d
