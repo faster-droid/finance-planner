@@ -121,7 +121,7 @@ jobs:
           docker pull ghcr.io/${{ github.repository_owner }}/finance-planner:${{ github.run_number }}
 
           # Перейти в директорию с docker-compose.yml
-          cd /home/grom/finance-planner/monitoring/  # Замените на фактический путь
+          cd /home/grom/work/finance-planner/monitoring  # Замените на фактический путь
 
           # Обновить переменные в .env файле
           echo "REPOSITORY_OWNER=${{ github.repository_owner }}" > .env
