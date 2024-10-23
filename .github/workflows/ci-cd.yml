@@ -46,7 +46,20 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      # Шаг 5: Определение и увеличение версии
+      # Шаг 5: Сборка Docker-образа
+      - name: Build Docker image
+        run: docker build -t ghcr.io/${{ github.repository_owner }}/finance-planner:${{ github.run_number }} .
+
+      # Шаг 6: Публикация Docker-образа в GHCR
+      - name: Push Docker image to GHCR
+        run: docker push ghcr.io/${{ github.repository_owner }}/finance-planner:${{ github.run_number }}
+
+
+      # Шаг 7: Обновление документации (например, с помощью Javadoc)
+      - name: Generate Javadoc
+        run: mvn javadoc:javadoc
+
+      # Шаг 8: Определение и увеличение версии
       - name: Determine and Bump Version
         id: version
         run: |
@@ -85,43 +98,34 @@ jobs:
           echo "new_tag=$NEW_TAG" >> $GITHUB_ENV
 
           # Создаем тег в git
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
           git tag $NEW_TAG
           git push origin $NEW_TAG || echo "Failed to push tag $NEW_TAG. It may already exist."
-
-      # Шаг 6: Сборка Docker-образа
-      - name: Build Docker image
-        run: docker build -t ghcr.io/${{ github.repository_owner }}/finance-planner:${{ env.new_tag }} .
-
-      # Шаг 7: Публикация Docker-образа в GHCR
-      - name: Push Docker image to GHCR
-        run: docker push ghcr.io/${{ github.repository_owner }}/finance-planner:${{ env.new_tag }}
 
   deploy:
     needs: build_and_publish
     runs-on: ubuntu-latest
 
     steps:
-      - name: Deploy to Server via SSH
-        uses: appleboy/ssh-action@master
-        with:
-          host: 82.146.40.100
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SERVER_SSH_KEY }}
-          script: |
-            # Логин в GitHub Container Registry
-            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+    # Шаг 7: Деплой приложения на сервер через SSH
+    - name: Deploy to Server via SSH
+      uses: appleboy/ssh-action@master
+      with:
+        host: 82.146.40.100
+        username: ${{ secrets.SERVER_USER }}
+        key: ${{ secrets.SERVER_SSH_KEY }}
+        script: |
+          # Логин в GitHub Container Registry
+          docker login ghcr.io -u ${{ github.actor }} -p ${{ secrets.GITHUB_TOKEN }}
 
-            # Пулл последнего образа
-            docker pull ghcr.io/${{ github.repository_owner }}/finance-planner:${{ env.new_tag }}
+          # Пулл последнего образа
+          docker pull ghcr.io/${{ github.repository_owner }}/finance-planner:${{ github.run_number }}
 
-            # Перейти в директорию с docker-compose.yml
-            cd /home/grom/work/finance-planner/monitoring  # Замените на фактический путь
+          # Перейти в директорию с docker-compose.yml
+          cd /home/grom/work/finance-planner/monitoring  # Замените на фактический путь
 
-            # Обновить переменные в .env файле
-            echo "REPOSITORY_OWNER=${{ github.repository_owner }}" > .env
-            echo "IMAGE_TAG=${{ env.new_tag }}" >> .env
+          # Обновить переменные в .env файле
+          echo "REPOSITORY_OWNER=${{ github.repository_owner }}" > .env
+          echo "IMAGE_TAG=${{ github.run_number }}" >> .env
 
-            # Запустить или перезапустить сервис finance-planner через docker-compose
-            docker compose up -d --build
+          # Запустить или перезапустить сервис finance-planner через docker-compose
+          docker compose up -d
