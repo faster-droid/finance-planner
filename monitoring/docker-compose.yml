@@ -53,7 +53,7 @@ services:
       - logging-network 
 
   fluentd:
-    image: fluent/fluentd
+    image: fluent/fluentd:v1.14-1
     ports:
       - "24224:24224"
     volumes:
