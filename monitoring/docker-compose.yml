@@ -1,55 +1,79 @@
-services:
-  finance-planner:
-    image: ghcr.io/${REPOSITORY_OWNER}/finance-planner:${IMAGE_TAG}
+services: 
+  finance-planner: 
+    image: ghcr.io/${REPOSITORY_OWNER}/finance-planner:${IMAGE_TAG} 
+    ports: 
+      - "80:8080" 
+    volumes: 
+      - finance-planner-db-data:/data 
+    environment: 
+      - LOGGING_LEVEL=INFO
+    networks: 
+      - monitoring-network 
+
+  prometheus: 
+    image: prom/prometheus 
+    volumes: 
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml 
+    ports: 
+      - "9090:9090" 
+    networks: 
+      - monitoring-network 
+
+  grafana: 
+    image: grafana/grafana 
+    ports: 
+      - "3000:3000" 
+    volumes: 
+      - grafana-storage:/var/lib/grafana 
+      - ./monitoring/provisioning:/etc/grafana/provisioning
+    networks: 
+      - monitoring-network 
+
+  cadvisor:
+    image: google/cadvisor:latest
     ports:
-      - "80:8080"
+      - "8081:8080"
+    networks:
+      - monitoring-network
+
+  blackbox-exporter:
+    image: prom/blackbox-exporter
+    ports:
+      - "9115:9115"
+    networks:
+      - monitoring-network
+
+  elasticsearch: 
+    image: elasticsearch:7.10.1 
+    environment: 
+      - discovery.type=single-node 
+    ports: 
+      - "9200:9200" 
+    networks: 
+      - logging-network 
+
+  fluentd:
+    image: fluent/fluentd
+    ports:
+      - "24224:24224"
     volumes:
-      - finance-planner-db-data:/data
-    environment:
-      - LOGGING_LEVEL=INFO  # Убедитесь, что ваше приложение настроено на вывод логов
+      - ./fluentd/fluent.conf:/fluentd/etc/fluent.conf
     networks:
-      - monitoring-network
+      - logging-network
 
-  prometheus:
-    image: prom/prometheus
-    volumes:
-      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+  kibana:
+    image: kibana:7.10.1
     ports:
-      - "9090:9090"
+      - "5601:5601"
     networks:
-      - monitoring-network
+      - logging-network
 
-  grafana:
-    image: grafana/grafana
-    ports:
-      - "3000:3000"
-    volumes:
-      - grafana-storage:/var/lib/grafana
-    networks:
-      - monitoring-network
-
-  elasticsearch:
-    image: elasticsearch:7.10.1
-    environment:
-      - discovery.type=single-node
-    ports:
-      - "9200:9200"
-    networks:
-      - monitoring-network
-
-  logstash:
-    image: logstash:7.10.1
-    ports:
-      - "5044:5044"
-    networks:
-      - monitoring-network
-    volumes:
-      - ./logstash.conf:/usr/share/logstash/pipeline/logstash.conf
-
-networks:
-  monitoring-network:
+networks: 
+  monitoring-network: 
+    driver: bridge 
+  logging-network:
     driver: bridge
 
-volumes:
-  finance-planner-db-data:
-  grafana-storage:
+volumes: 
+  finance-planner-db-data: 
+  grafana-storage: 
