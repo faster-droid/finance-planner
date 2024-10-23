@@ -1,8 +1,8 @@
 services:
   finance-planner:
-    image: ghcr.io/${REPOSITORY_OWNER}/finance-planner:64
+    image: ghcr.io/${REPOSITORY_OWNER}/finance-planner:${IMAGE_TAG}
     ports:
-      - "8080:8080"
+      - "80:8080"
     volumes:
       - finance-planner-db-data:/data
     environment:
