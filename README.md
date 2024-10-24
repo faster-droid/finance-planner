@@ -14,7 +14,7 @@ http://82.146.40.100/finance-planner/expenses
 
 
 
-------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------
 
 
 
@@ -38,3 +38,59 @@ http://82.146.40.100/finance-planner/expenses
 ## Релизный цикл приложения и правила версионирования 
 - Используйте семантическое версионирование: MAJOR.MINOR.PATCH. 
 - Увеличивайте MAJOR при внесении несовместимых изменений, MINOR для новых функций, PATCH для исправлений. 
+
+
+
+
+.
+├── Dockerfile                  # Файл для сборки Docker-образа
+├── monitoring                  # Директория для мониторинга
+│   ├── docker-compose.yml      # Конфигурация Docker Compose
+│   ├── fluentd                 # Конфигурация Fluentd
+│   │   └── fluent.conf         # Конфигурационный файл Fluentd
+│   ├── logstash.conf           # Конфигурация Logstash
+│   ├── monitoring              # Конфигурация Prometheus
+│   │   ├── prometheus.yml      # Конфигурационный файл Prometheus
+│   │   └── provisioning        # Директория для провизии
+│   └── provisioning            # Директория для провизии
+│       ├── dashboards          # Директория для дашбордов
+│       │   ├── dashboard.yml   # Конфигурация дашборда
+│       │   └── finance_dashboard.json # JSON для дашборда финансов
+│       └── datasources         # Директория для источников данных
+│           └── datasource.yml  # Конфигурация источника данных
+├── pom.xml                     # Файл конфигурации Maven
+├── README.md                   # Этот файл
+├── script.sh                   # Скрипт для автоматизации
+├── src                         # Исходный код приложения
+│   ├── main                    # Основной код
+│   │   ├── java                # Java-код
+│   │   │   └── com
+│   │   │       └── example
+│   │   │           └── finance
+│   │   │               ├── Expense.java          # Класс для расходов
+│   │   │               └── ExpenseServlet.java   # Servlet для обработки расходов
+│   │   ├── resources           # Ресурсы приложения
+│   │   │   ├── db.properties   # Конфигурация базы данных
+│   │   │   └── schema.sql      # SQL-схема базы данных
+│   │   └── webapp              # Веб-приложение
+│   │       ├── assets          # Статические ресурсы
+│   │       ├── index.jsp       # Главная страница
+│   │       ├── styles.css      # CSS-стили
+│   │       └── WEB-INF         # Защищенные ресурсы
+│   │           └── web.xml     # Конфигурация веб-приложения
+│   └── test                    # Тесты
+│       └── java                # Тесты на Java
+│           └── com
+│               └── example
+│                   └── finance
+│                       └── ExampleTest.java      # Тесты для приложения
+└── target                      # Скомпилированные артефакты
+    ├── classes                 # Скомпилированные классы
+    ├── finance-planner         # Скомпилированное веб-приложение
+    ├── finance-planner.war     # WAR-файл для развертывания
+    ├── generated-sources       # Сгенерированные источники
+    ├── generated-test-sources   # Сгенерированные тестовые источники
+    ├── maven-archiver          # Архиватор Maven
+    ├── maven-status             # Статус Maven
+    ├── surefire-reports        # Отчеты о тестировании
+    └── test-classes            # Скомпилированные тестовые классы
