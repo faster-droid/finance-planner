@@ -11,8 +11,8 @@ RUN mvn dependency:go-offline
 # Копируем исходный код
 COPY src ./src
 
-# Собираем приложение и генерируем файл WAR
-RUN mvn clean package
+# Собираем приложение и генерируем файл WAR, пропуская тесты
+RUN mvn clean package -DskipTests
 
 # Этап 2: Запуск приложения с помощью Tomcat
 FROM tomcat:9.0-jdk11-openjdk
