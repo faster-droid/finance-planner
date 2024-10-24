@@ -38,7 +38,11 @@ jobs:
       - name: Build with Maven
         run: mvn clean package
 
-      # Шаг 4: Логин в GitHub Container Registry
+      # Шаг 4: Запуск тестов
+      - name: Run Tests
+        run: mvn test
+
+      # Шаг 5: Логин в GitHub Container Registry
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v2
         with:
@@ -46,20 +50,19 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      # Шаг 5: Сборка Docker-образа
+      # Шаг 6: Сборка Docker-образа
       - name: Build Docker image
         run: docker build -t ghcr.io/${{ github.repository_owner }}/finance-planner:${{ github.run_number }} .
 
-      # Шаг 6: Публикация Docker-образа в GHCR
+      # Шаг 7: Публикация Docker-образа в GHCR
       - name: Push Docker image to GHCR
         run: docker push ghcr.io/${{ github.repository_owner }}/finance-planner:${{ github.run_number }}
 
-
-      # Шаг 7: Обновление документации (например, с помощью Javadoc)
+      # Шаг 8: Обновление документации (например, с помощью Javadoc)
       - name: Generate Javadoc
         run: mvn javadoc:javadoc
 
-      # Шаг 8: Определение и увеличение версии
+      # Шаг 9: Определение и увеличение версии
       - name: Determine and Bump Version
         id: version
         run: |
@@ -106,28 +109,26 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # Шаг 1: Деплой приложения на сервер через SSH
+      - name: Deploy to Server via SSH
+        uses: appleboy/ssh-action@master
+        with:
+          host: 82.146.40.100
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          script: |
+            # Логин в GitHub Container Registry
+            docker login ghcr.io -u ${{ github.actor }} -p ${{ secrets.GITHUB_TOKEN }}
 
-    # Шаг 7: Деплой приложения на сервер через SSH
-    - name: Deploy to Server via SSH
-      uses: appleboy/ssh-action@master
-      with:
-        host: 82.146.40.100
-        username: ${{ secrets.SERVER_USER }}
-        key: ${{ secrets.SERVER_SSH_KEY }}
-        script: |
-          # Логин в GitHub Container Registry
-          docker login ghcr.io -u ${{ github.actor }} -p ${{ secrets.GITHUB_TOKEN }}
+            # Пулл последнего образа
+            docker pull ghcr.io/${{ github.repository_owner }}/finance-planner:${{ github.run_number }}
 
-          # Пулл последнего образа
-          docker pull ghcr.io/${{ github.repository_owner }}/finance-planner:${{ github.run_number }}
+            # Перейти в директорию с docker-compose.yml
+            cd /home/grom/work/finance-planner/monitoring  # Замените на фактический путь
 
-          # Перейти в директорию с docker-compose.yml
-          cd /home/grom/work/finance-planner/monitoring  # Замените на фактический путь
+            # Обновить переменные в .env файле
+            echo "REPOSITORY_OWNER=${{ github.repository_owner }}" > .env
+            echo "IMAGE_TAG=${{ github.run_number }}" >> .env
 
-          # Обновить переменные в .env файле
-          echo "REPOSITORY_OWNER=${{ github.repository_owner }}" > .env
-          echo "IMAGE_TAG=${{ github.run_number }}" >> .env
-
-          # Запустить или перезапустить сервис finance-planner через docker-compose
-          docker compose up -d
-
+            # Запустить или перезапустить сервис finance-planner через docker-compose
+            docker compose up -d
