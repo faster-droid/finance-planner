@@ -1,7 +1,21 @@
 global:
-  scrape_interval: 15s  # Как часто собирать данные
+  scrape_interval: 15s
 
 scrape_configs:
-  - job_name: 'prometheus'
+  - job_name: 'cadvisor'
     static_configs:
-      - targets: ['viazar.ru:80']  # Укажите целевые адреса
+      - targets: ['cadvisor:8080']
+
+  - job_name: 'blackbox'
+    metrics_path: /probe
+    params:
+      module: [http_2xx]
+    static_configs:
+      - targets:
+        - http://finance-planner:8080/
+        - http://finance-planner:8080/new
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - target_label: __address__
+        replacement: blackbox-exporter:9115
