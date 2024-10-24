@@ -106,6 +106,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+
     # Шаг 7: Деплой приложения на сервер через SSH
     - name: Deploy to Server via SSH
       uses: appleboy/ssh-action@master
@@ -129,3 +130,4 @@ jobs:
 
           # Запустить или перезапустить сервис finance-planner через docker-compose
           docker compose up -d
+
