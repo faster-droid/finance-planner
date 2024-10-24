@@ -106,20 +106,28 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Шаг 7: Деплой приложения на сервер через SSH
-      - name: Deploy to Server via SSH
-        uses: appleboy/ssh-action@master
-        with:
-          host: 82.146.40.100
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SERVER_SSH_KEY }}
-          script: |
-            # Логин в GitHub Container Registry
-            docker login ghcr.io -u ${{ github.actor }} -p ${{ secrets.GITHUB_TOKEN }}
-            # Пулл последнего образа
-            docker pull ghcr.io/${{ github.repository_owner }}/finance-planner:${{ github.run_number }}
-            # Остановка и удаление старого контейнера, если он существует
-            docker stop finance-planner || true
-            docker rm finance-planner || true
-            # Запуск нового контейнера
-            docker run -d --name finance-planner -p 80:8080 -v finance-planner-db-data:/data ghcr.io/${{ github.repository_owner }}/finance-planner:${{ github.run_number }}
+
+    # Шаг 7: Деплой приложения на сервер через SSH
+    - name: Deploy to Server via SSH
+      uses: appleboy/ssh-action@master
+      with:
+        host: 82.146.40.100
+        username: ${{ secrets.SERVER_USER }}
+        key: ${{ secrets.SERVER_SSH_KEY }}
+        script: |
+          # Логин в GitHub Container Registry
+          docker login ghcr.io -u ${{ github.actor }} -p ${{ secrets.GITHUB_TOKEN }}
+
+          # Пулл последнего образа
+          docker pull ghcr.io/${{ github.repository_owner }}/finance-planner:${{ github.run_number }}
+
+          # Перейти в директорию с docker-compose.yml
+          cd /home/grom/work/finance-planner/monitoring  # Замените на фактический путь
+
+          # Обновить переменные в .env файле
+          echo "REPOSITORY_OWNER=${{ github.repository_owner }}" > .env
+          echo "IMAGE_TAG=${{ github.run_number }}" >> .env
+
+          # Запустить или перезапустить сервис finance-planner через docker-compose
+          docker compose up -d
+
