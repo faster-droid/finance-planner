@@ -17,9 +17,6 @@ RUN mvn clean package -Pproduction
 # Этап 2: Запуск приложения с помощью Tomcat
 FROM tomcat:9.0-jdk11-openjdk
 
-# Создаём директорию для хранения данных и устанавливаем права доступа (если требуется)
-RUN mkdir -p /data && chmod -R 777 /data
-
 # Удаляем стандартные приложения Tomcat (опционально)
 RUN rm -rf /usr/local/tomcat/webapps/*
 
